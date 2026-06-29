@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,viewport-fit=cover"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#1e3a2a"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="MISHIMA ACADEMY"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<title>MISHIMA ACADEMY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,900;1,900&family=Barlow:wght@400;500;700;900&family=DM+Mono:wght@400;500&family=Caveat:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#1e3a2a;
+  --bg2:#243f33;
+  --bg3:#1a3028;
+  --green:#2d5a3d;
+  --green2:#3a6e4a;
+  --chalk:#f0ece0;
+  --chalk2:#c8c4b0;
+  --yellow:#e8c547;
+  --yellow2:#f5d76e;
+  --blue:#64b5d4;
+  --border:#3a6a4a;
+  --border2:#4a7a5a;
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--chalk);min-height:100vh;overflow-x:hidden;padding-top:env(safe-area-inset-top)}
+
+/* ════════ OVERLAY ════════ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.open{opacity:1;pointer-events:all}
+
+/* ════════ SIDE MENU ════════ */
+.sidemenu{position:fixed;top:0;left:0;bottom:0;width:280px;background:#152a1e;z-index:300;transform:translateX(-100%);transition:transform .32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-right:2px solid var(--border)}
+.sidemenu.open{transform:translateX(0)}
+.sm-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sm-logo{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;font-style:italic;color:var(--chalk);letter-spacing:.08em}
+.sm-logo em{color:var(--yellow);font-style:normal}
+.sm-close{width:32px;height:32px;display:grid;place-items:center;color:var(--chalk2);font-size:20px;cursor:pointer;transition:color .2s}
+.sm-close:hover{color:var(--chalk)}
+.sm-nav{flex:1;padding:16px 0;overflow-y:auto}
+.sm-label{font-size:8px;font-weight:700;letter-spacing:.3em;color:var(--chalk2);opacity:.5;text-transform:uppercase;padding:16px 24px 8px;font-family:'DM Mono',monospace}
+.sm-item{display:flex;align-items:center;gap:14px;padding:13px 24px;text-decoration:none;color:var(--chalk2);transition:all .2s;cursor:pointer;border-left:3px solid transparent}
+.sm-item:hover{color:var(--chalk);background:rgba(255,255,255,.05);border-left-color:var(--yellow)}
+.sm-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sm-name{font-size:13px;font-weight:700;letter-spacing:.04em}
+.sm-footer{padding:20px 24px;border-top:1px solid var(--border)}
+.sm-status{display:flex;align-items:center;gap:7px;font-size:8px;font-weight:700;letter-spacing:.2em;color:var(--chalk2);opacity:.5;text-transform:uppercase;font-family:'DM Mono',monospace}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;flex-shrink:0}
+
+/* ════════ HEADER ════════ */
+header{position:sticky;top:0;z-index:100;background:#152a1e;border-bottom:3px solid var(--border);display:grid;grid-template-columns:72px 1fr auto;width:100%}
+.hd-burger{display:grid;place-items:center;border-right:2px solid var(--border);cursor:pointer;transition:background .2s;min-height:64px}
+.hd-burger:hover{background:rgba(255,255,255,.05)}
+.burger-icon{display:flex;flex-direction:column;gap:6px}
+.burger-icon span{display:block;width:24px;height:2.5px;background:var(--chalk)}
+.hd-logo-wrap{padding:0 20px;display:flex;align-items:center}
+.hd-logo{font-family:'Barlow Condensed',sans-serif;font-size:clamp(14px,3vw,22px);font-weight:900;font-style:italic;letter-spacing:.08em;color:var(--chalk);text-transform:uppercase;white-space:nowrap}
+.hd-logo em{color:var(--yellow);font-style:normal}
+.hd-right{display:flex;align-items:stretch;border-left:2px solid var(--border)}
+.hd-clock-wrap{padding:0 18px;display:flex;flex-direction:column;justify-content:center;text-align:right}
+#hd-time{font-size:clamp(13px,2.5vw,20px);font-weight:900;font-family:'DM Mono',monospace;color:var(--yellow);letter-spacing:.04em;line-height:1;white-space:nowrap}
+#hd-date{font-size:clamp(6px,1.2vw,8px);font-weight:700;letter-spacing:.15em;color:var(--chalk2);text-transform:uppercase;margin-top:4px;white-space:nowrap;opacity:.7}
+
+/* ════════ HERO ════════ */
+.hero{background:#152a1e;border-bottom:3px solid var(--border);padding:40px 32px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:260px}
+/* 黒板グリッド線 */
+.hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(to right,rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.04) 1px,transparent 1px);background-size:36px 36px;pointer-events:none}
+/* チョーク風のざらつき */
+.hero::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(255,255,255,.01) 2px,rgba(255,255,255,.01) 4px);pointer-events:none}
+.hero-eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:14px;position:relative;z-index:1}
+.eyebrow-line{width:28px;height:2px;background:var(--yellow)}
+.eyebrow-txt{font-size:9px;font-weight:700;letter-spacing:.3em;color:var(--yellow);text-transform:uppercase;font-family:'DM Mono',monospace}
+.hero-title{position:relative;z-index:1;line-height:.86;text-align:center;transform:scaleY(.92);transform-origin:center}
+.hero-title-line{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-style:italic;font-size:clamp(52px,10vw,130px);letter-spacing:-.02em;text-transform:uppercase}
+.hero-title-line.fill{color:var(--chalk)}
+.hero-title-line.outline{color:transparent;-webkit-text-stroke:2.5px var(--chalk)}
+.hero-title-line.outline em{color:var(--yellow);-webkit-text-stroke:0;font-style:normal}
+.hero-tag{position:relative;z-index:1;margin-top:18px;font-family:'Caveat',cursive;font-size:18px;color:var(--chalk2);letter-spacing:.05em;opacity:.8}
+
+/* ════════ SEARCH ════════ */
+.search-section{background:#1a3028;border-bottom:2px solid var(--border);padding:14px 24px}
+.search-label{font-size:8px;font-weight:700;letter-spacing:.3em;color:var(--chalk2);opacity:.6;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:8px}
+.search-inner{display:flex;align-items:center;border:1.5px solid var(--border2);overflow:hidden;max-width:600px}
+.search-icon{padding:11px 14px;font-size:15px;color:var(--chalk2);opacity:.5;border-right:1px solid var(--border);flex-shrink:0}
+#search{flex:1;padding:11px 14px;font-size:12px;font-family:'DM Mono',monospace;color:var(--chalk);background:transparent;border:none;outline:none;letter-spacing:.04em}
+#search::placeholder{color:var(--chalk2);opacity:.4}
+.search-btn{padding:11px 18px;background:var(--yellow);color:#1a1a1a;font-size:9px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;border:none;font-family:'Barlow',sans-serif;white-space:nowrap}
+
+/* ════════ MAIN ════════ */
+main{padding:20px;display:flex;flex-direction:column;gap:16px}
+#no-match{display:none;text-align:center;padding:48px;font-family:'Caveat',cursive;font-size:22px;color:var(--chalk2);opacity:.6;border:2px dashed var(--border)}
+
+/* ════════ BIG CATEGORY ════════ */
+.bigcat{border:2px solid var(--border);overflow:hidden;border-radius:4px}
+.bigcat-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;cursor:pointer;background:#152a1e;transition:background .2s;user-select:none}
+.bigcat-hdr:hover{background:#1a3028}
+.bigcat-hdr.open{background:#1a3028;border-bottom:2px solid var(--border)}
+.bigcat-left{display:flex;align-items:center;gap:14px}
+.bigcat-icon{font-size:20px}
+.bigcat-info{}
+.bigcat-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--chalk);letter-spacing:.02em;text-transform:uppercase;line-height:1}
+.bigcat-sub{font-size:8px;font-weight:700;letter-spacing:.2em;color:var(--chalk2);opacity:.6;text-transform:uppercase;font-family:'DM Mono',monospace;margin-top:3px}
+.bigcat-arrow{font-size:16px;color:var(--yellow);transition:transform .3s}
+.bigcat-hdr.open .bigcat-arrow{transform:rotate(90deg)}
+.bigcat-body{display:none;background:var(--bg2);padding:16px}
+.bigcat-body.open{display:block}
+
+/* ════════ 月タブ ════════ */
+.month-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.mtab{font-size:9px;font-weight:700;letter-spacing:.12em;padding:5px 12px;border:1.5px solid var(--border2);color:var(--chalk2);cursor:pointer;transition:all .2s;font-family:'DM Mono',monospace;border-radius:2px}
+.mtab:hover{border-color:var(--yellow);color:var(--yellow)}
+.mtab.active{background:var(--yellow);color:#1a1a1a;border-color:var(--yellow)}
+
+/* ════════ 月コンテンツ ════════ */
+.month-content{display:none}
+.month-content.active{display:block}
+.month-section{background:var(--bg3);border:1px solid var(--border);border-radius:4px;margin-bottom:10px;overflow:hidden}
+.month-section-hdr{padding:8px 14px;background:#152a1e;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.month-section-label{font-size:8px;font-weight:700;letter-spacing:.2em;color:var(--yellow);text-transform:uppercase;font-family:'DM Mono',monospace}
+.month-section-count{font-size:8px;color:var(--chalk2);opacity:.6;font-family:'DM Mono',monospace}
+.links-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:var(--border)}
+
+/* ════════ LINK CARD ════════ */
+.lk{display:block;padding:14px 16px;background:var(--bg2);text-decoration:none;color:var(--chalk);position:relative;overflow:hidden;transition:background .15s}
+.lk.hidden{display:none}
+.lk:hover{background:#2d5a3d}
+.lk:hover .lk-arr{opacity:1;transform:translate(0,0)}
+.lk:hover::before{transform:scaleX(1)}
+.lk::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--yellow);transform:scaleX(0);transform-origin:left;transition:transform .25s}
+.lk-name{font-size:11px;font-weight:700;color:var(--chalk);letter-spacing:.02em;margin-bottom:4px;padding-right:20px;line-height:1.3}
+.lk-meta{font-size:8px;font-family:'DM Mono',monospace;color:var(--chalk2);opacity:.5;letter-spacing:.06em}
+.lk-arr{position:absolute;top:12px;right:12px;font-size:13px;color:var(--yellow);opacity:0;transform:translate(-4px,-4px);transition:all .2s}
+
+/* ════════ プロダクトテスト用 ════════ */
+.test-links{display:flex;flex-direction:column;gap:6px}
+.test-lk{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);text-decoration:none;color:var(--chalk);transition:all .15s;border-radius:3px}
+.test-lk:hover{background:#1a3028;border-color:var(--blue)}
+.test-lk:hover .test-arr{color:var(--blue)}
+.test-lk-name{font-size:12px;font-weight:700;color:var(--chalk);letter-spacing:.02em}
+.test-lk-meta{font-size:8px;font-family:'DM Mono',monospace;color:var(--chalk2);opacity:.5;margin-top:2px}
+.test-arr{font-size:14px;color:var(--chalk2);opacity:.5;transition:color .2s;flex-shrink:0;margin-left:12px}
+
+/* ════════ FOOTER ════════ */
+footer{background:#152a1e;border-top:2px solid var(--border);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.ft-brand{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;font-style:italic;color:var(--yellow);letter-spacing:.06em}
+.ft-copy{font-size:9px;color:var(--chalk2);opacity:.5;margin-top:3px;font-family:'DM Mono',monospace;letter-spacing:.1em}
+.ft-meta{font-family:'DM Mono',monospace;font-size:9px;color:var(--chalk2);opacity:.4;text-align:right;line-height:1.8}
+
+@media(max-width:480px){
+  .hero{padding:28px 20px}
+  main{padding:12px}
+  footer{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay"></div>
+
+<!-- SIDE MENU -->
+<nav class="sidemenu" id="sidemenu">
+  <div class="sm-header">
+    <div class="sm-logo">MISHIMA <em>ACADEMY</em></div>
+    <div class="sm-close" id="sm-close">✕</div>
+  </div>
+  <div class="sm-nav">
+    <div class="sm-label">Categories</div>
+    <div class="sm-item" onclick="openCat('training');closeMenu()"><span class="sm-dot" style="background:var(--yellow)"></span><span class="sm-name">商品知識トレーニング</span></div>
+    <div class="sm-item" onclick="openCat('test');closeMenu()"><span class="sm-dot" style="background:var(--blue)"></span><span class="sm-name">プロダクトテスト</span></div>
+  </div>
+  <div class="sm-footer">
+    <div class="sm-status"><span class="live-dot"></span>Mishima Academy — Study Board</div>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<header>
+  <div class="hd-burger" id="burger">
+    <div class="burger-icon"><span></span><span></span><span></span></div>
+  </div>
+  <div class="hd-logo-wrap">
+    <div class="hd-logo">MISHIMA <em>ACADEMY</em></div>
+  </div>
+  <div class="hd-right">
+    <div class="hd-clock-wrap">
+      <span id="hd-time">--:--</span>
+      <span id="hd-date">--- -- --</span>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <div class="eyebrow-line"></div>
+    <div class="eyebrow-txt">Mishima, JP — Study Board</div>
+  </div>
+  <h1 class="hero-title">
+    <span class="hero-title-line fill">MISHIMA</span>
+    <span class="hero-title-line outline">ACAD<em>EMY.</em></span>
+  </h1>
+  <div class="hero-tag">// Learn every day. Grow every day.</div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-label">// Search — Type to Filter</div>
+  <div class="search-inner">
+    <div class="search-icon">⌕</div>
+    <input id="search" type="text" placeholder="学習内容を検索..." autocomplete="off"/>
+    <button class="search-btn">Search ↗</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main id="main">
+<div id="no-match">✎ 該当する学習コンテンツが見つかりません</div>
+
+<!-- ══════════════════════════════
+     大カテゴリ1：商品知識トレーニング
+══════════════════════════════ -->
+<div class="bigcat" id="cat-training">
+  <div class="bigcat-hdr" id="hdr-training" onclick="toggleCat('training')">
+    <div class="bigcat-left">
+      <div class="bigcat-icon">📚</div>
+      <div class="bigcat-info">
+        <div class="bigcat-name">商品知識トレーニング</div>
+        <div class="bigcat-sub">くらしのデジタル知識トレーニング — 月別</div>
+      </div>
+    </div>
+    <div class="bigcat-arrow">▶</div>
+  </div>
+  <div class="bigcat-body" id="body-training">
+    <!-- 月タブ -->
+    <div class="month-tabs" id="tabs-training">
+      <div class="mtab active" data-month="2026-06" onclick="switchMonth('training','2026-06')">2026.06</div>
+      <div class="mtab" data-month="2026-05" onclick="switchMonth('training','2026-05')">2026.05</div>
+      <div class="mtab" data-month="2026-04" onclick="switchMonth('training','2026-04')">2026.04</div>
+      <div class="mtab" data-month="2026-03" onclick="switchMonth('training','2026-03')">2026.03</div>
+      <div class="mtab" data-month="2026-02" onclick="switchMonth('training','2026-02')">2026.02</div>
+      <div class="mtab" data-month="2026-01" onclick="switchMonth('training','2026-01')">2026.01</div>
+      <div class="mtab" data-month="2025-12" onclick="switchMonth('training','2025-12')">2025.12</div>
+      <div class="mtab" data-month="2025-11" onclick="switchMonth('training','2025-11')">2025.11</div>
+      <div class="mtab" data-month="2025-10" onclick="switchMonth('training','2025-10')">2025.10</div>
+      <div class="mtab" data-month="2025-09" onclick="switchMonth('training','2025-09')">2025.09</div>
+      <div class="mtab" data-month="2025-08" onclick="switchMonth('training','2025-08')">2025.08</div>
+      <div class="mtab" data-month="2025-07" onclick="switchMonth('training','2025-07')">2025.07</div>
+      <div class="mtab" data-month="2025-06" onclick="switchMonth('training','2025-06')">2025.06</div>
+      <div class="mtab" data-month="2025-05" onclick="switchMonth('training','2025-05')">2025.05</div>
+    </div>
+
+    <!-- 2026年6月 -->
+    <div class="month-content active" data-month="2026-06">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2026年6月</span><span class="month-section-count">10問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxitY_C8KoOkSW0M8rr17FDhnZi0MW9_NCO_Z60w04kwCcHb3n5jusSu8KwUeN4-XRsTw/exec" target="_blank" rel="noopener" data-name="WNR-5400XE6P/2S"><div class="lk-name">WNR-5400XE6P/2S</div><div class="lk-meta">新定番 / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzGty90eRiTXUutd4F6RADJ1Gn8k65ligMl0jRYXviD-NivEgCC-8iX10Wcl5fn0WoFVA/exec" target="_blank" rel="noopener" data-name="EP-988A3"><div class="lk-name">EP-988A3</div><div class="lk-meta">新定番 / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxapcshAjMS2y_14yfK2IyJSP6fQjPjfTnuC5x961_Mjm-I1GQi0-cxBRkour8o8jW0/exec" target="_blank" rel="noopener" data-name="VG279QML5A"><div class="lk-name">VG279QML5A</div><div class="lk-meta">新定番 / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwZoCO7_qZTi1C6M54L7yiOFNyot4D3jkXxMLywsYX3mDr34TpYfylDnXfhJRMCLIPA-g/exec" target="_blank" rel="noopener" data-name="LINKS LC7430"><div class="lk-name">LINKS LC7430</div><div class="lk-meta">新定番 / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwp9DtbqXhlEEujj58h7PUqZmtOQnCUF6uj3GXqQhylqbC0aNFVUPbz5-p9qKMb9JRoZQ/exec" target="_blank" rel="noopener" data-name="TCL C7Lシリーズ"><div class="lk-name">TCL C7Lシリーズ</div><div class="lk-meta">GoogleTV / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyDXVuVSp0IwTuHHJm0IJfj8SdOQxQ4t8FthhYN9fmYa6zp1HcwBTQ8EO7kV0OJDb_8GQ/exec" target="_blank" rel="noopener" data-name="TCL T6Dシリーズ"><div class="lk-name">TCL T6Dシリーズ</div><div class="lk-meta">GoogleTV / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbza86PK1fkpmwhWjYHB5cX-ygCY1Lplmnyv0slwGBO4OldHbm2UM8LDMZX4o-Bn100O/exec" target="_blank" rel="noopener" data-name="DEEBOT T90 Pro OMNI"><div class="lk-name">DEEBOT T90 Pro OMNI</div><div class="lk-meta">ロボット掃除機 / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwHX_AvKrKV1ixQ32H8aqVi3l87HjNSTvKRINOGMYMk03I3Y9AmlaA00oR1nkVydypmog/exec" target="_blank" rel="noopener" data-name="WWDC2026 iOS27編"><div class="lk-name">WWDC2026 iOS27編</div><div class="lk-meta">News / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycby15ehLQik82oP1JirYaI7ccAM7AgtFGRwSIlACOgdxACOws8-GVAIBI5TzMzOstE2T/exec" target="_blank" rel="noopener" data-name="WWDC2026 MacOS27編"><div class="lk-name">WWDC2026 MacOS27編</div><div class="lk-meta">News / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxVMjBuT-1fnZUo4h3GtC7qoHkI-SeKOre0DLdUjH0tWVdhh02WcnGqULCSn95BgHcL/exec" target="_blank" rel="noopener" data-name="WWDC2026 WatchOS27編"><div class="lk-name">WWDC2026 WatchOS27編</div><div class="lk-meta">News / No.10</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026年5月 -->
+    <div class="month-content" data-month="2026-05">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2026年5月</span><span class="month-section-count">10問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxrm4ufdJ0vZffPHbP9ki0ywUBib8YPhenHYnOwwbchJNIMeCBWb6m7VV02c-pQTRIo/exec" target="_blank" rel="noopener" data-name="ヘッドセット Shokz OpenFit2"><div class="lk-name">ヘッドセット Shokz OpenFit2</div><div class="lk-meta">SLCT6.5 / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxCfy5AaiDHqaPa5GXX4dmphzYGZo8MeS6uOsD_eXDHlzxSFqDtLYaQaouLBr9pzHnqQw/exec" target="_blank" rel="noopener" data-name="モニター VL-P27-9TE"><div class="lk-name">モニター VL-P27-9TE</div><div class="lk-meta">SLCT6.5 / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzR-IAEsq2AmUNxAiuKzYwJz6DQb0q7nOuqeEMORr0gqo-SLqgm6b-im4TYzOvCkndvvA/exec" target="_blank" rel="noopener" data-name="kimini英会話"><div class="lk-name">kimini英会話</div><div class="lk-meta">SLCT6.5 / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyYpAG3NPst6HFjOEnrVF1LvI4--GwO9H0RGSnRxDfz3epyS9Xm7n4oU4o4DfTx02KzbA/exec" target="_blank" rel="noopener" data-name="見守りGPS マモサーチ3"><div class="lk-name">見守りGPS マモサーチ3</div><div class="lk-meta">SLCT6.5 / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbx5VinG8q-2kDAWJHEHCMAXt_zreNOSlpY92uC0pZbVFwws5ZoHdauPnpeaJXql3Yv6/exec" target="_blank" rel="noopener" data-name="セキュリティカメラ Tapo C260"><div class="lk-name">セキュリティカメラ Tapo C260</div><div class="lk-meta">SLCT6.5 / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwUn5zOQmfltqnwb4Qa66vDtWc31DnEBLgIX2y-yzL4HUOe8hSxB6BdPW6L4prdx4IS/exec" target="_blank" rel="noopener" data-name="FAX付複合機 MFC-J742DWN"><div class="lk-name">FAX付複合機 MFC-J742DWN</div><div class="lk-meta">SLCT6.5 / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwKGYZ8HZo0PiwjVm-0W1Wobx6-57_gfuTHCXubsfgIxobOlMMqyScIe6l2K7sCP5pm-A/exec" target="_blank" rel="noopener" data-name="A3エコタンクプリンター EW-M973A3T"><div class="lk-name">A3エコタンクプリンター EW-M973A3T</div><div class="lk-meta">SLCT6.5 / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxJ0OQRjsNZWJ2DKGZFJtM4WlJlW0CCUwnPOfcJGNQkKry99bt1DrJ8Gcw6D-tOksE2nA/exec" target="_blank" rel="noopener" data-name="ポータブルブルーレイドライブ LBD-PWC6U3CVBK"><div class="lk-name">ポータブルブルーレイドライブ</div><div class="lk-meta">News / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycby7Un7R8vYb5ib-lFUnY3RJPaOXIkuY7NqccpkF6AIi5PW158XpLAoyF8EFnHdAZsSx/exec" target="_blank" rel="noopener" data-name="VRAM ユニファイドメモリ メインメモリ"><div class="lk-name">VRAM・ユニファイドメモリ・メインメモリ</div><div class="lk-meta">News / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxAuCp8Nnp-czE8wPjSg_JbPDcP3Gl5TGs8V6hKv1fMtLOLNV6_JjaSzEIoHnEN5n6I/exec" target="_blank" rel="noopener" data-name="生成AIとMacの親和性 Windowsとの比較"><div class="lk-name">生成AIとMacの親和性・Windowsとの比較</div><div class="lk-meta">News / No.10</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026年4月 -->
+    <div class="month-content" data-month="2026-04">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2026年4月</span><span class="month-section-count">10問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxrfu34zjmsX3QY9YppZNc47zqiMqvS6gF4IooIWIKWs2BB_-01WI_RG2woap3Lg2jbbQ/exec" target="_blank" rel="noopener" data-name="センサーライト付セキュリティカメラ Tapo C615F KIT"><div class="lk-name">Tapo C615F KIT</div><div class="lk-meta">SLCT 6.5 / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwbH7CUDZjgTyIp_AqMtem3IKHQgMMs7bDZdXsYT8MjA9kU_IP6188vKg_qaVOXlxklig/exec" target="_blank" rel="noopener" data-name="GoogleTV 43P7K"><div class="lk-name">GoogleTV 43P7K</div><div class="lk-meta">SLCT 6.5 / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzDXU0cZKD4LSg6jeedss0-SAWGkwKyznzMIE9Fs3uRckKXFZ21D5Z8hNRELed4Z-vC4w/exec" target="_blank" rel="noopener" data-name="プラズマクラスター空気清浄機 KI-UX75"><div class="lk-name">プラズマクラスター空気清浄機 KI-UX75</div><div class="lk-meta">SLCT 6.5 / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxMD_VbsT8CLVKB7DyQq2hiSYrfzqAW-sOL_Usl0XBle-Epgqoy1wtzBujnO3AoZoAhSQ/exec" target="_blank" rel="noopener" data-name="10G対応WIFI7ルーター WXR-18000BE10P"><div class="lk-name">10G対応WIFI7ルーター WXR-18000BE10P</div><div class="lk-meta">LIFESTYLE / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyfx3X_t3EFhQ4IVtykznKp0ZrL1WRh9SRWmfmj5sOc1GQxBTwOPxOIspYgS7PnrAQE/exec" target="_blank" rel="noopener" data-name="スマート電動歯ブラシ PHILIPS HX7410"><div class="lk-name">スマート電動歯ブラシ PHILIPS HX7410</div><div class="lk-meta">LIFESTYLE / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwQdRdlXpTJo4L7EnGLwFGs4tEGapueOZgD9OJJVipp2EjJ1Z1106j2wR35sls3wtwiNw/exec" target="_blank" rel="noopener" data-name="スタビライザー OSMO MOBILE 7P"><div class="lk-name">スタビライザー OSMO MOBILE 7P</div><div class="lk-meta">OUTDOOR / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwdUrLWqKok3xdsJMdxfR5chkCw8ho5lf7UQyJ13-lN-MZM-WEZ4spbFaGokPzkjqYL/exec" target="_blank" rel="noopener" data-name="ChromeBook DUET"><div class="lk-name">ChromeBook DUET</div><div class="lk-meta">新定番 / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyrrvECkWsyUIo9ShcyLq9RaEScq-A2szkvFLOJZXZKn-zI0dsRqlK33qmcTGeTzRirzw/exec" target="_blank" rel="noopener" data-name="Type-C対応モニター LCD-C242SD"><div class="lk-name">Type-C対応モニター LCD-C242SD</div><div class="lk-meta">新定番 / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxHgnqprOAvZDYhXwld4n1g5BsUh9OtLBiHQWO_LEiNCD8iVfJGoUlAFWrB9rrdanRSBQ/exec" target="_blank" rel="noopener" data-name="240Hz対応e-Sportsモニター VG259QMRL5A"><div class="lk-name">240Hz対応e-Sportsモニター VG259QMRL5A</div><div class="lk-meta">新定番 / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwUQah9TKXQsnkQxOlRjaeieqsP2eeAaMnusTpIx-ld7OuKc0Tclm67ec7Hp22aQX7x/exec" target="_blank" rel="noopener" data-name="AirTag第二世代"><div class="lk-name">AirTag 第二世代</div><div class="lk-meta">Apple / No.10</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026年3月 -->
+    <div class="month-content" data-month="2026-03">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2026年3月</span><span class="month-section-count">10問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbwaW2Dbu0jDEwxKmQhxB6G2GR9WOcKuUTXkGz41pDW9D8o72C6HM8FaRG743UnUbNhSag/exec" target="_blank" rel="noopener" data-name="iPhone 17e"><div class="lk-name">iPhone 17e</div><div class="lk-meta">Apple / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbzK5YZJFXA1MqFO8yJrsskoXzkElRBlOMro8TtVKtXuzq4gjtCQAFD_hmfUoBzx4kXL/exec" target="_blank" rel="noopener" data-name="MacBook Pro M5"><div class="lk-name">MacBook Pro M5</div><div class="lk-meta">Apple / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxNJ7lNxJ8MOUb21S3CRVGWPRyJLS6F2PsyXylBaHNy7g7wZvQ1trZ8w6ihdKrRgImV/exec" target="_blank" rel="noopener" data-name="MacBook Air M5"><div class="lk-name">MacBook Air M5</div><div class="lk-meta">Apple / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbz-9J-13voZ7QmuyYXwaNtwEdgTOcy-iQwxOBo1D1FIYbURvcvl_U3HgUkF9o_F7seftw/exec" target="_blank" rel="noopener" data-name="MacBook NEO"><div class="lk-name">MacBook NEO</div><div class="lk-meta">Apple / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbxv069_wqbLgGKQKyog6lGmaKYKJkLt0ZNbhy93EEsFyhMnidLv42FboK845h9RMnvi/exec" target="_blank" rel="noopener" data-name="StudioDisplay"><div class="lk-name">StudioDisplay</div><div class="lk-meta">Apple / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbw6H3NR7XwnllsfAiU66cRY_KOCOIVCs5FXQMDOTMZWicyq4KrGtAw8Ez2ALa3Gay-f/exec" target="_blank" rel="noopener" data-name="StudioDisplayXDR"><div class="lk-name">StudioDisplay XDR</div><div class="lk-meta">Apple / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbxdPK2pViv2oGSQB45yXhfytn5xr65MW6E6lQD6HWO_0ojE38Rxlj4eSiAFhgCcADe1/exec" target="_blank" rel="noopener" data-name="iPad Air M4"><div class="lk-name">iPad Air M4</div><div class="lk-meta">Apple / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbytnUJH8EI2AHi5U9ii4k4ahvDpGgnTl4TSNdJVyIDXJwWMS2HQ4QgYIQtQSqoi1Ci6Wg/exec" target="_blank" rel="noopener" data-name="EPSON A3ビジネスプリンター"><div class="lk-name">EPSON A3ビジネスプリンター</div><div class="lk-meta">Bussiness / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbwdA1fnxc3vsrMWnlU1Fh93RKN26eI8bSyneseQsgg1SBkNcbiMRVxBz2ZgoVaCmoab/exec" target="_blank" rel="noopener" data-name="EPSON ビジネスプロジェクター EB-1780W"><div class="lk-name">EPSON ビジネスプロジェクター EB-1780W</div><div class="lk-meta">Bussiness / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbyCBCTSAZaTDF_NidXt1YPw-KMaHlhO4t3aA0HWTM8_bvAK4paOG_EP77sJ6at8wlh9/exec" target="_blank" rel="noopener" data-name="半固体モバイルバッテリー新製品"><div class="lk-name">半固体モバイルバッテリー新製品</div><div class="lk-meta">LifeStyle / No.10</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026年2月 -->
+    <div class="month-content" data-month="2026-02">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2026年2月</span><span class="month-section-count">10問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyumsvRV0n07InYcg_oqqKiCHrmcFyFap4EK6qZbL_il6HqWPAnfWJ_OBgH0ag01r5u/exec" target="_blank" rel="noopener" data-name="AirPods Pro 3"><div class="lk-name">AirPods Pro 3</div><div class="lk-meta">Apple / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbw9Pun9qnPw1m9B2lwOMqWVb_9EeRP6YJuyb8h7iucOd6lazht-rjcXR6JHxoF2cGv9/exec" target="_blank" rel="noopener" data-name="PLAUD NOTE"><div class="lk-name">PLAUD NOTE</div><div class="lk-meta">Business / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzpGS8n9REjNVbdLuLWfCQ3_35xMx4L2LUNBYd8dHbqWbHcqHZkEidLqZTc5uSLMlIeow/exec" target="_blank" rel="noopener" data-name="IODATA NAS HDL-LEシリーズ"><div class="lk-name">IODATA NAS HDL-LEシリーズ</div><div class="lk-meta">Business / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbynZqx4nH0xuMTbgqvJW3OU6aB1RcT3JoUgSqDSnGifnKahy9k4dlLTBoTsZHWkQDo0/exec" target="_blank" rel="noopener" data-name="ドッキングステーション DST-100BPBK"><div class="lk-name">ドッキングステーション DST-100BPBK</div><div class="lk-meta">Business / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxPyrP5niNIGDxqz1Z_4f14a129CSWPG6bsg_RfZLbmOD5zLFpgb6un5O2iH1osWcZWMg/exec" target="_blank" rel="noopener" data-name="A4カラーレーザープリンター LBP646C"><div class="lk-name">A4カラーレーザープリンター LBP646C</div><div class="lk-meta">Business / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyowvgjJKIgQN8CdWqxnxa4LIAr5tea2DT58JqsqT0Dq8KtOfYcS3CO-AlLRKkGaAc0/exec" target="_blank" rel="noopener" data-name="VLOGCAM ZV-1M2"><div class="lk-name">VLOGCAM ZV-1M2</div><div class="lk-meta">Outdoor / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycby1hm3ds2Zz-I4MusVQe4TpRtPJjowejEJo093inSa6D_whuGXSUzWEXSB6YKDWVnXPuQ/exec" target="_blank" rel="noopener" data-name="ワイヤレススピーカー SRS-ULT10"><div class="lk-name">ワイヤレススピーカー SRS-ULT10</div><div class="lk-meta">Outdoor / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyDWk4_ayL7j-k2h-xJJy7rOZ9ntpTUa_KKAlweyj49SrevhhbZ-SPklWdc-hu87GRkoQ/exec" target="_blank" rel="noopener" data-name="AppleWatch Ultra 3"><div class="lk-name">Apple Watch Ultra 3</div><div class="lk-meta">Outdoor / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbw0jbr0DjvkJC6ExMZslJ5vYYrw5miVcNtwXV-71LwSny_3kqFNBBQfTTe0RWFXXpfYZA/exec" target="_blank" rel="noopener" data-name="MacBook Air M4"><div class="lk-name">MacBook Air M4</div><div class="lk-meta">Apple / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwqkbY9x4cXlV3mUXNYzG4R3MD8rXhubN5U7q_dQ3xLm2FkrR3IcrYkf7fgqR9Csl21qw/exec" target="_blank" rel="noopener" data-name="ACER Predator Neo16"><div class="lk-name">ACER Predator Neo16</div><div class="lk-meta">Education / No.10</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026年1月 -->
+    <div class="month-content" data-month="2026-01">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2026年1月</span><span class="month-section-count">10問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyPpxjXTeImzPOGisiroJZsiJS9uU2biiddYHNSRU1JVTRURyw-IIquTaXCiJZa6uuwZA/exec" target="_blank" rel="noopener" data-name="ナトリウムイオンモバイルバッテリー DE-C55L-9000"><div class="lk-name">ナトリウムイオンモバイルバッテリー DE-C55L-9000</div><div class="lk-meta">Home / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxdag88qb9cCwgr7qx4WZ6kD9-DyLq-LDrcWOFStoiCNCvKKvey37-oXFgTz2TaGxlafw/exec" target="_blank" rel="noopener" data-name="リン酸鉄モバイルバッテリー DE-C39-12000BK"><div class="lk-name">リン酸鉄モバイルバッテリー DE-C39-12000BK</div><div class="lk-meta">Home / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxftmot1yGibbpbiQaxfFs0ytgEA5JrcuLZjdb03GMFEm2V4bdebekmBvbSTj7OMJuw_Q/exec" target="_blank" rel="noopener" data-name="エコタンクプリンター EW-M757T"><div class="lk-name">エコタンクプリンター EW-M757T</div><div class="lk-meta">Home / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbww2Vx9mLeNQDW2yQYbbicipmbxNA8RG3Uyk3v77TYcvoPOsW6G43H3I2nM_k5T_UnrHQ/exec" target="_blank" rel="noopener" data-name="ファストタンクプリンター DCP-J4250N"><div class="lk-name">ファストタンクプリンター DCP-J4250N</div><div class="lk-meta">Home / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbw_H_8nej2owigjehiy50DipxXUL_GMWAZzX2XGFPWHMhUVPoPVO2HdXgsSSuXoG516/exec" target="_blank" rel="noopener" data-name="360°アクティブスピーカー SRS-RA3000"><div class="lk-name">360°アクティブスピーカー SRS-RA3000</div><div class="lk-meta">Home / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwwTCMi3We6HsrR4WkPQ-D46iIAlHs_RggiBKgsnwBOYneJmDytThov4kJz1iZI5xqM/exec" target="_blank" rel="noopener" data-name="ネックバンドスピーカー HT-AN7"><div class="lk-name">ネックバンドスピーカー HT-AN7</div><div class="lk-meta">Home / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbw9_M3BtRH966EoeEomrdTyUXcx69upOaHDnuh06UVIrUW6mS-gtQm6AxQ7TDFFhTna/exec" target="_blank" rel="noopener" data-name="ロボット掃除機 DEEBOT T30 ONMI"><div class="lk-name">ロボット掃除機 DEEBOT T30 OMNI</div><div class="lk-meta">Home / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwovifmoW5CzPNQqbQUxnb6ot79LHB_DmoxgrLwIsLzZct8KzrCiHp-7nGn-OKSRMgJnw/exec" target="_blank" rel="noopener" data-name="ホームルーター PIX-RT100"><div class="lk-name">ホームルーター PIX-RT100</div><div class="lk-meta">Home / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzSJbWGBnkteLsHarjcEpNTvWuM_M1vNAP_nAHmsa0CL7-qlZ1fJQz7LQOiKGeXKfJf/exec" target="_blank" rel="noopener" data-name="ICカードリーダー RC-S300"><div class="lk-name">ICカードリーダー RC-S300</div><div class="lk-meta">確定申告 / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxnOqqcYrUCDwJylfAsa1KnIhNgcSwc2wSqLDDK4TCJd9xoQQnmC7WFIOSJhZlQWMw/exec" target="_blank" rel="noopener" data-name="ドキュメントスキャナー SCANSNAP FI-IX2500"><div class="lk-name">ドキュメントスキャナー SCANSNAP FI-IX2500</div><div class="lk-meta">確定申告 / No.10</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2025年12月 -->
+    <div class="month-content" data-month="2025-12">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2025年12月</span><span class="month-section-count">10問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbw-1Qh7SbvM4mtTmM3IDudbLXaGwroIF-uGoztdDm-W_eR_FmtSNHE2CGndnLUFbkETww/exec" target="_blank" rel="noopener" data-name="モニター VTU27021BT"><div class="lk-name">モニター VTU27021BT</div><div class="lk-meta">Create / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbymrkF78JzBd5T1J7nQGKyQnUsnrT032RGp2qF08f2zC_aq36AtguO0NCkgEbCMk4oB-w/exec" target="_blank" rel="noopener" data-name="eSportsアクセサリ Logicool G G-PROシリーズ"><div class="lk-name">Logicool G G-PROシリーズ</div><div class="lk-meta">eSports / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbz1EiglOxIhCCVjYySFLb5ZwI3wMfYZmbdgNvokSC7Qkpp40ptc7X2D6YCJgTBkzltS/exec" target="_blank" rel="noopener" data-name="液晶ペンタブレット XP-PEN Artist12 2nd"><div class="lk-name">液晶ペンタブレット XP-PEN Artist12 2nd</div><div class="lk-meta">Create / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwoLa-49izIhOLbKcq8cHDV5KhlxwC1IrutkK6fmVhnA4cbJLVdd6oiwAQEhR2ubgbp/exec" target="_blank" rel="noopener" data-name="プロジェクター BenQ TK700-JP"><div class="lk-name">プロジェクター BenQ TK700-JP</div><div class="lk-meta">eSports / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbxnGQaov9LrWmptku-1U47-z--hPXaNi9j5rId3OGxmDHIuXV1hBxalfZ0V-JObkMM/exec" target="_blank" rel="noopener" data-name="ポータブルゲーミングPC ROG ALLY"><div class="lk-name">ポータブルゲーミングPC ROG ALLY</div><div class="lk-meta">eSports / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycby5A8y9mJjUVrAXj6dBKycIWmcdOagJDaOwrPD0y51v5YyH6GSyW717G_fYKG9vzxbgfw/exec" target="_blank" rel="noopener" data-name="オーディオミキサー YAMAHA ZG02"><div class="lk-name">オーディオミキサー YAMAHA ZG02</div><div class="lk-meta">eSports / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbyCLQ59V3s_1TG61fZhcx3mQWkyFHgWNU1w1kMhHZi6JLcLvHxZ0hBRBLhSmrvwgl8JAA/exec" target="_blank" rel="noopener" data-name="ライブプロダクションスイッチャー ATEM Mini Pro"><div class="lk-name">ライブプロダクションスイッチャー ATEM Mini Pro</div><div class="lk-meta">Create / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbxP5YkI0n3jDQ2YfJtxl8hRhvv-inJY_7N3KpvJ-4BHrDKO99jcygbbLtbh-GVVduB6EQ/exec" target="_blank" rel="noopener" data-name="セキュリティカメラ DXアンテナ WSS10M1C"><div class="lk-name">セキュリティカメラ DXアンテナ WSS10M1C</div><div class="lk-meta">Safety / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbz1s1sXneS9DEYIUYDkE3TXmMTRyNNiLqw3DkVqkJJlENiF8RVA152ALbVzP9bEPGFuIQ/exec" target="_blank" rel="noopener" data-name="セキュリティカメラ DXアンテナ CNW3CDF1"><div class="lk-name">セキュリティカメラ DXアンテナ CNW3CDF1</div><div class="lk-meta">Safety / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbznd--YYK6IqwqEB_k2Bc0qc11vqc8_cxGfN3kw_GXuKLUGo-rUCZ69G-2BHbmSu-j8/exec" target="_blank" rel="noopener" data-name="カメラ用マイクロSD Samsung PRO Endurance"><div class="lk-name">カメラ用マイクロSD Samsung PRO Endurance</div><div class="lk-meta">Safety / No.10</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2025年11月 -->
+    <div class="month-content" data-month="2025-11">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2025年11月</span><span class="month-section-count">10問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbyDgSwgdMZ7_qjlcXcqjDPZYGCCNhUoLrChHtY3jALAfMV10n3-turVZdP8dJzP6gr_gA/exec" target="_blank" rel="noopener" data-name="ゲーミングルーター"><div class="lk-name">ゲーミングルーター</div><div class="lk-meta">Education / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbxTi2BJnf54_NFVRGsNmBOEPi6x17m5qO9SXAUe3Yt5UUUBTn7HSx0LZw690PZq7lnTcQ/exec" target="_blank" rel="noopener" data-name="DJI Pocket3"><div class="lk-name">DJI Pocket3</div><div class="lk-meta">Outdoor / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbyc9AVvoPGMAwNdM9kijq7HS5_Qkiz6UNq2njNacJoUQm5BenHcA08zLxiRuIbJg2DXLA/exec" target="_blank" rel="noopener" data-name="モバイルプリンター PX-S06"><div class="lk-name">モバイルプリンター PX-S06</div><div class="lk-meta">Outdoor / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbwBBF2txIR0OoUH03QRm-z-4zzg88Ze5UBRSF_5uxonp_Cgt_rAtenKv73WbTF6rIr7/exec" target="_blank" rel="noopener" data-name="Vlog cam"><div class="lk-name">Vlog cam</div><div class="lk-meta">Outdoor / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbwwNib5y_T-rPJhGyFHfW5YQ5a-5HgnRAiNk37KFn8bnmR8_hyUXeJnUiJ vou6wIfEw/exec" target="_blank" rel="noopener" data-name="ワイヤレスヘッドセット"><div class="lk-name">ワイヤレスヘッドセット</div><div class="lk-meta">Outdoor / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbzaF0p9w_BJlFbi2-2XQsL8hJktzclqkHDm0S7sKF4icMS4WSDn57GE6GO3zkJ5MQ/exec" target="_blank" rel="noopener" data-name="モバイルプロジェクター"><div class="lk-name">モバイルプロジェクター</div><div class="lk-meta">Education / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbxT_xpzVs1VjnifknGKuyuw36imp5su3NLGoPOzNe4mQlHizogDVdzuBT8VD30obI1P/exec" target="_blank" rel="noopener" data-name="TP-LINK スマートホームシステム"><div class="lk-name">TP-LINK スマートホームシステム</div><div class="lk-meta">Home / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbyh33p1ebGbcj2rjuajajt7ESAUFMUejHQ_0SNJhQ9DnA-fSbHbEeFV4I20HnB0hBmdWg/exec" target="_blank" rel="noopener" data-name="スマートウォッチ my First Fone"><div class="lk-name">スマートウォッチ my First Fone</div><div class="lk-meta">Education / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbz-jSqsJD2Geqb4CmMBY7Ax9kAMaJkYhVK2vrGt9J11XGgukaJ1PvlejSUHDoGNzyIS4w/exec" target="_blank" rel="noopener" data-name="モバイルバッテリー"><div class="lk-name">モバイルバッテリー</div><div class="lk-meta">Outdoor / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/a/macros/pcdepot.jp/s/AKfycbx8MbmYO1279AaRYufcJvbCSHhMY_qJMIDKdP0ltBSNO-qa5h7AFW6LCf7V89Iv6gnV/exec" target="_blank" rel="noopener" data-name="Type-Cケーブル 種類と特徴"><div class="lk-name">Type-Cケーブル 種類と特徴</div><div class="lk-meta">Home / No.10</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2025年10月 -->
+    <div class="month-content" data-month="2025-10">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2025年10月</span><span class="month-section-count">10問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbx3D9PBgzUaJdUW47KyvIZoN13DB9fnAW912JTxdmGuU-LWLc7t-hbJCdXVodFHBFnN/exec" target="_blank" rel="noopener" data-name="ゴルフスコープ"><div class="lk-name">ゴルフスコープ</div><div class="lk-meta">Outdoor / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyIgjEVIT3aRCg4tr65iMdkPnwkKCi5e_uwkwoCfHrKufIm2MXXq3fD6pJhQQKvS9vj/exec" target="_blank" rel="noopener" data-name="カープレイヤー"><div class="lk-name">カープレイヤー</div><div class="lk-meta">Outdoor / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwbEag-A4ae5hXBVmaenheGfZWyztiyStG5FuDX6YLrc_T8q3XCJKrXT9ABY9qXz7g/exec" target="_blank" rel="noopener" data-name="フィットネスバイク"><div class="lk-name">フィットネスバイク</div><div class="lk-meta">Home / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxNFT3v2i54_69TfmIowHq9Rkxp1bixbZ3G0oPio-FZirrF50PeCu3xySv_XKIVIHEHag/exec" target="_blank" rel="noopener" data-name="ミニフォトプリンター"><div class="lk-name">ミニフォトプリンター</div><div class="lk-meta">Home / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxOtGHloOh68_XcR7gzpGQD6HzBG9Nq8QRPGkE2spw77YWX9YMzeCpf3aO86P3cJ7Dk/exec" target="_blank" rel="noopener" data-name="MagSafe対応ポータブルSSD"><div class="lk-name">MagSafe対応ポータブルSSD</div><div class="lk-meta">Home / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbySbEYKWthbhcuqlE9ET1oN3SQEcJajDFTDBrAAd0_wFCLelM89qjOJFT97istONOg/exec" target="_blank" rel="noopener" data-name="HomePod と 空間オーディオ"><div class="lk-name">HomePod と空間オーディオ</div><div class="lk-meta">Apple / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxS6Se9pVc0l7o830V20etTRddfiNb_Q7wnozIpKmVu9Sc_5Ktf5C1CH03qL4V91XA55w/exec" target="_blank" rel="noopener" data-name="ネックスピーカー"><div class="lk-name">ネックスピーカー</div><div class="lk-meta">Home / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwgoJzE-1IN-2jl2xMKvZamEHwQKXMA5EUsQr42oMgJgRTnS052Je9ed3EPYk7pvaT7/exec" target="_blank" rel="noopener" data-name="Canon PowerShot ZOOM"><div class="lk-name">Canon PowerShot ZOOM</div><div class="lk-meta">Outdoor / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbx9OcEtzn3iDrsn1G3iJFApRGaPw7szhjpOyT2Yg8SkJLLek5dH2KWraV2rFiPFPKKwKg/exec" target="_blank" rel="noopener" data-name="レコードプレイヤー"><div class="lk-name">レコードプレイヤー</div><div class="lk-meta">Home / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwE2acaZq5hlhi6A5iSOWle2fjHK2Jkf17mb403JXhwNiLEXqupBfUAG5veUjYNJwop/exec" target="_blank" rel="noopener" data-name="ペット給餌機"><div class="lk-name">ペット給餌機</div><div class="lk-meta">Home / No.10</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2025年9月 -->
+    <div class="month-content" data-month="2025-09">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2025年9月</span><span class="month-section-count">10問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxI-LTyHMjhYdlBwds3DSLa9xIJwRmqGTXtFSG4fxboscarsuZDA9QCivi4b420xftb/exec" target="_blank" rel="noopener" data-name="iPhone新製品"><div class="lk-name">iPhone 新製品（予定）</div><div class="lk-meta">Apple / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbz6G9z9m3DhnI8xfKC3zcrW-W4RfDIZpfHSBwjet1XIcblq8E8YtjOWEcYwtcUKRIfT/exec" target="_blank" rel="noopener" data-name="iPhoneとeSIM"><div class="lk-name">iPhoneとeSIM</div><div class="lk-meta">Apple / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyBbK8d19N5SWo8-OcR_25pIrJX0viFroXpFk2OGiqOBHN9GJxptJ0z1vFGxCrxfNDF/exec" target="_blank" rel="noopener" data-name="ビジネスレーザープリンター"><div class="lk-name">ビジネスレーザープリンター</div><div class="lk-meta">eSports / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbykK-rFcejOPq2EWhXjGkUi-zANn78S5-EIQZOqgPhQwWeO9prodOOS2zh97pLSttJivQ/exec" target="_blank" rel="noopener" data-name="液晶ペンタブレット"><div class="lk-name">液晶ペンタブレット</div><div class="lk-meta">eSports / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbz4vodu1aI2cA1irMlzwQ41GR6VbzYRsOGcD1Qy4p9yMH5K5IrhGIN4qizRQ4nbub_8xg/exec" target="_blank" rel="noopener" data-name="ショートカットキーボード"><div class="lk-name">ショートカットキーボード</div><div class="lk-meta">eSports / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzwRRbQ-ENTM4rG9bt9Dbr2ssFv1Ghcb6DMi36FOxONOEd8cSZ6nRx56Mr0xaSJW4U/exec" target="_blank" rel="noopener" data-name="オーディオインターフェース"><div class="lk-name">オーディオインターフェース</div><div class="lk-meta">eSports / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbw212XbLZe83cGVuiX-p08PDNlEemfd8GvgUJo0PwdSvxhkEK7sUBSWr94YNAKqtTXB/exec" target="_blank" rel="noopener" data-name="TP-Linkスマートホーム"><div class="lk-name">TP-Linkスマートホーム</div><div class="lk-meta">生活 / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyHYlfY9w6ZHkEwrqEEH5n55oqxBeeCs7Qo43zPppVXksw7vX4gd1Kz5XvOrO7r6waV2Q/exec" target="_blank" rel="noopener" data-name="デジタルカメラ"><div class="lk-name">デジタルカメラ</div><div class="lk-meta">生活 / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyT90jdi0XreE-HEsW1rPM9BhW7WBUHcnWlOX0-1zZIMMvYa11Z2NeJyrBAdUoNMNsd6w/exec" target="_blank" rel="noopener" data-name="ワイヤレスイヤホン"><div class="lk-name">ワイヤレスイヤホン</div><div class="lk-meta">生活 / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwHE-QmUHN7Fm8pxib3U5p1di6T-JvlWuHG_nUFZ7hLUz3HWodizlaNUwLOkNGSbBYD/exec" target="_blank" rel="noopener" data-name="Appleインテリジェンス"><div class="lk-name">Appleインテリジェンス</div><div class="lk-meta">Apple / No.10</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2025年8月 -->
+    <div class="month-content" data-month="2025-08">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2025年8月</span><span class="month-section-count">15問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxv5mhkRqAj9i6BgAHmc9xjxSH1rJrZdJBkTooLfXGsPJOvnxWCnso2RjTJMt8joAk-Hg/exec" target="_blank" rel="noopener" data-name="iPhoneのバックアップ"><div class="lk-name">iPhoneのバックアップ</div><div class="lk-meta">Apple / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxSTqqSK71Q99xh5DlBARfxsJtHxvSJc0Gqj8zrtSXU58EkJI0MWi9iTQZ9TOM7U--zmA/exec" target="_blank" rel="noopener" data-name="iPhoneの緊急連絡先と緊急通報"><div class="lk-name">iPhoneの緊急連絡先と緊急通報</div><div class="lk-meta">Apple / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzIBfHKruPFLy9ZEV8Je84wU21ZvhpTM0DfQ08Cmje1WVz6L-8Uuu8tT0KWDpoz8WO2/exec" target="_blank" rel="noopener" data-name="SNS投稿とフィルタリング"><div class="lk-name">SNS投稿とフィルタリング</div><div class="lk-meta">生活 / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyFgUeEru04j7O2aB14sGRvV6dr5twrAgRrIz768-jrUiwKE3boXx7vuyx5qMmoE5bSiw/exec" target="_blank" rel="noopener" data-name="迷惑メールフィルタリング"><div class="lk-name">迷惑メールフィルタリング</div><div class="lk-meta">生活 / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyZndb5aAAQ2vsZ0YwF6PbxMDS_8VjTWXjSMUpzvL9Q6VzUOoXDt16ovEkg-PVrss7O/exec" target="_blank" rel="noopener" data-name="海外でのインターネット通信とセキュリティ"><div class="lk-name">海外でのインターネット通信とセキュリティ</div><div class="lk-meta">生活 / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycby0Sejd9HLhaEfPaI0nr1H418a58B2wk2_o_m4qwP7qzWnaZriXcyWvC-cd-Hw6rfdK0Q/exec" target="_blank" rel="noopener" data-name="夏のエアコンとスマートホーム"><div class="lk-name">夏のエアコンとスマートホーム</div><div class="lk-meta">生活 / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwXlb1sL206_hNHZiKDJEIVnMDqIFFUQNKBPlbd-6n3W4HI_YoAzuT-z6tk1ZOdLQxnSA/exec" target="_blank" rel="noopener" data-name="クレジットカード即時通知"><div class="lk-name">クレジットカード即時通知</div><div class="lk-meta">生活 / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyPcGInqYTckPtUL45UNhRZM-4OhL_60AEGIESwOo1RH35OdopORcWCeiQYRWXfNvJa/exec" target="_blank" rel="noopener" data-name="アナログ写真とスキャナー"><div class="lk-name">アナログ写真とスキャナー</div><div class="lk-meta">生活 / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbx2mO4lWN5ha4gfzmsfyEcbKgtI36eHj_kzhu9uo42-w-fMXbbWNAfEaoU3iOzCxp9X/exec" target="_blank" rel="noopener" data-name="トイカメラ"><div class="lk-name">トイカメラ</div><div class="lk-meta">生活 / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxKJnUIYKz3omiSj4QnR27gDz3f30hpU5C-_PktJ7FUNA6vB_qFmuF1tqu8CttmoVAgrQ/exec" target="_blank" rel="noopener" data-name="DJIスタビライザー"><div class="lk-name">DJIスタビライザー</div><div class="lk-meta">生活 / No.10</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbx11IPBOQl9QWc0XVsDg_74Sv7dINkl8nPQN_J7KZUWFBZeq8Mj9uiZ_bW1xh8Z1C5U/exec" target="_blank" rel="noopener" data-name="USBメモリのマルウェア感染と対策"><div class="lk-name">USBメモリのマルウェア感染と対策</div><div class="lk-meta">生活 / No.11</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzjxrAYacp5JMSn5MWXRT5jiLFqRAxTgFkppEh2F9PqftsISRLz540h097nXwZBmJQXYQ/exec" target="_blank" rel="noopener" data-name="QRコード送り付け詐欺と対策"><div class="lk-name">QRコード送り付け詐欺と対策</div><div class="lk-meta">Apple / No.12</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxm5ASKPo7zdeIqjFiVm6_sfHUB3JxvlMTCpRwdcHMe9TuKjGmH5huzR2D6FmBU8SUU/exec" target="_blank" rel="noopener" data-name="NASNEと番組持ち出し"><div class="lk-name">NASNEと番組持ち出し</div><div class="lk-meta">生活 / No.13</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxDpiVkAWk0XEUXrPI2uQfZ6Wy67xYJZWT7SuEXI-Vb-b_VYkfDmeFsPPtuwbaAcwGKjA/exec" target="_blank" rel="noopener" data-name="オーディオインターフェース"><div class="lk-name">オーディオインターフェース</div><div class="lk-meta">音楽 / No.14</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycby2ssFugoV-CMCwv4dfARlQGau2EI3WUn_CZRMETilsFM_KRFkpeoWXRMKeVSo8wJ3f/exec" target="_blank" rel="noopener" data-name="CASIO 電子ピアノ"><div class="lk-name">CASIO 電子ピアノ</div><div class="lk-meta">音楽 / No.15</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2025年7月 -->
+    <div class="month-content" data-month="2025-07">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2025年7月</span><span class="month-section-count">17問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzAsOeYOgZVBaex_TBqnZb5Ogb1U5Doo3uxr0LNM6Of8iGDv_EnxrIhHFZlqXYERaKe/exec" target="_blank" rel="noopener" data-name="体組成計 OMRON"><div class="lk-name">体組成計（OMRON）</div><div class="lk-meta">生活 / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxQORtlYyl7KMvH_QKXwP2xgWV1P7NVsgKd8eqn5EtvfWtuTNrwQNoxIrYDBJtoz3opOg/exec" target="_blank" rel="noopener" data-name="GoPro"><div class="lk-name">GoPro</div><div class="lk-meta">スポーツ / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxU0EAUXLaZlyX6pesiFi92KsKVsDUgOndJ5tcElsQGxKkZ9x3RU95jaY5AllVGAiGbaQ/exec" target="_blank" rel="noopener" data-name="nasne"><div class="lk-name">nasne</div><div class="lk-meta">生活 / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzuTFXz4ZsdguDJWcUIfgMHNAwi5i_tjKXjdTWaj-usEeu0hsUbyVvVYd-0LmPsOKIKoQ/exec" target="_blank" rel="noopener" data-name="Google TV SONY BRAVIA"><div class="lk-name">Google TV（SONY BRAVIA）</div><div class="lk-meta">生活 / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzPiW3HNHBlmLTj-8HiXl9pnSfALxS8pmM0MDtManAZR3z_77EnyNs4GbHe-uppY03C-g/exec" target="_blank" rel="noopener" data-name="マイナンバーカードiPhone対応"><div class="lk-name">マイナンバーカードiPhone対応</div><div class="lk-meta">生活 / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyfbXN8HYhCh15f8xV9KKjA-e1LG4s5qnAS3HTH_NZz13_yYxXOPAWdYCJEqTo35paL/exec" target="_blank" rel="noopener" data-name="NHK ONE"><div class="lk-name">NHK ONE</div><div class="lk-meta">生活 / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzo-WIj3_EWFQmo06cFb59Fbd4qoax1EtKsp9FbhSAoorDWWY-tnwwaxotZhrlIwOt30g/exec" target="_blank" rel="noopener" data-name="完全ワイヤレスヘッドセット SONY"><div class="lk-name">完全ワイヤレスヘッドセット（SONY）</div><div class="lk-meta">生活 / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyaYOTY72uPh0sd6pvH-yM62Xc9UDC--v5ywy0h0BnUVcG8i8vOn-l1rjd3ZkxN6SpOvg/exec" target="_blank" rel="noopener" data-name="USB-C ACアダプター"><div class="lk-name">USB-C ACアダプター</div><div class="lk-meta">生活 / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyUg4vy8JwTPtOl-L23rwxi8p5hqZFjsezdzpP5jAXjSQBz2y14WPh_YrAF3ENF8ybn/exec" target="_blank" rel="noopener" data-name="スマートトラッカー"><div class="lk-name">スマートトラッカー</div><div class="lk-meta">生活 / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyydeh0YhqB1ooervJS8fzO4GjObXE5qDsCqOGeHRI8mGnsS42doX09vCqmNgIlIYi-yg/exec" target="_blank" rel="noopener" data-name="メッシュルーター TP-Link Deco"><div class="lk-name">メッシュルーター（TP-Link Deco）</div><div class="lk-meta">生活 / No.10</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzFIdjgTKCfpgoHdZzHFuwcIteJ14EL4unxjTyQbRVR6N9zGM-Dqb1OPjHRRg8c7Gz-/exec" target="_blank" rel="noopener" data-name="防犯カメラ TP-Link Tapo"><div class="lk-name">防犯カメラ（TP-Link Tapo）</div><div class="lk-meta">生活 / No.11</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbx3KPmW1MQhVIzkLA-nyMc5MbL6PCWSoCTg4GX1XRjH1UE0u_FXKUinQXAbq2ofXKUoMQ/exec" target="_blank" rel="noopener" data-name="HomePod"><div class="lk-name">HomePod</div><div class="lk-meta">Apple / No.12</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwi5SsQgPO8bWa9C9V0OpOh-44ybe5zzbZ-jNXEGksfFG_UUpMUhvKQEd55NZZyUzrnnQ/exec" target="_blank" rel="noopener" data-name="POCKETALK vs スマホアプリ"><div class="lk-name">POCKETALK vs スマホアプリ</div><div class="lk-meta">生活 / No.13</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxpH3LdtTTcrm1LgV-R_nMPndmXm8G8FWz1o8NVEgZlcwxulJQiFE7opGw31kX1jNzD/exec" target="_blank" rel="noopener" data-name="PowerShot Golf"><div class="lk-name">PowerShot Golf</div><div class="lk-meta">スポーツ / No.14</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwkizLk8F0RAsSrD1iw_T_6azJBG4r2HGYddjkAk8oyem4gk3FpsXmU-42FGd8ftArNSA/exec" target="_blank" rel="noopener" data-name="ランニング用ヘッドセット SONY Shokz"><div class="lk-name">ランニング用ヘッドセット（SONY/Shokz）</div><div class="lk-meta">スポーツ / No.15</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzssjvwuHtp_42VzkecycCdRxuDGstkFhmp8cB21VSaRXIlnXDVn29CU0wFdZwe6Dgt/exec" target="_blank" rel="noopener" data-name="SummerFES①"><div class="lk-name">SummerFES①</div><div class="lk-meta">FES / No.16</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxV5lyp_YMrrR9HwFKgOh0a5qBW_vwh4FlEEX-TrO99VuucZ4HH-d6YcAjIIqwO-7WQsg/exec" target="_blank" rel="noopener" data-name="SummerFES②"><div class="lk-name">SummerFES②</div><div class="lk-meta">FES / No.17</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2025年6月 -->
+    <div class="month-content" data-month="2025-06">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2025年6月</span><span class="month-section-count">12問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzg2qchPOdB12EfncDBFhXqxyhDHAStgZjkxYRFatHW6b6T9Fv1tQ2mBgW3fVC1BJAnRA/exec" target="_blank" rel="noopener" data-name="PCパーツ 標準編"><div class="lk-name">PCパーツ【標準編】</div><div class="lk-meta">パーツ / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxf5eV2i-VPHJiyBn1lDyJ2Pl7TSaC-33b91TctkWEd45gzUkovqI-cuHBwry_pWzNK/exec" target="_blank" rel="noopener" data-name="PCパーツ 応用編"><div class="lk-name">PCパーツ【応用編】</div><div class="lk-meta">パーツ / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxAp2eDGtq5FJDDLRGp1QkYwlhYu5VJTI4-BUzSNy9diqR4GfyMUU5Yu1gdhciwCaib/exec" target="_blank" rel="noopener" data-name="グラフィックボード 特化編"><div class="lk-name">グラフィックボード【特化編】</div><div class="lk-meta">パーツ / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbw_InOmLuZkvhRokHAg20gHFMk_Wyxg5WUO_PbQcXTU376U00rBkhvlde71S3v2yhXK/exec" target="_blank" rel="noopener" data-name="Windows10サポート終了"><div class="lk-name">Windows10サポート終了</div><div class="lk-meta">Windows / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyVthCXuzhp_bd5X1NAll1k_HYjzH254nWdeQYf-_y4Li9xiO7BwzD_yk1NOnhAV9Aq/exec" target="_blank" rel="noopener" data-name="Surface 2025年度新製品"><div class="lk-name">Surface 2025年度新製品</div><div class="lk-meta">Windows / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwfbrpECYHClke1x2qqSdZw8o2frrqInDH35sYZ43jNaJCb2VBzViiL-lEpz7LKd8qD/exec" target="_blank" rel="noopener" data-name="WWDC2025"><div class="lk-name">WWDC2025</div><div class="lk-meta">Apple / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxAobgHOOCBD5cf5PQWiKWMSHGEKLDUx82qKMunWRC_cjfs2atkOsS3FsQq-Y8iJwlysQ/exec" target="_blank" rel="noopener" data-name="携帯電話会社 新料金プラン"><div class="lk-name">携帯電話会社 新料金プラン</div><div class="lk-meta">キャリア / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycby_itQMXdrDlk1W5xV9JtzgiIwI-xZXqPKHQavuIwudebXzvWthPpNAmjggKE4k0x7TFA/exec" target="_blank" rel="noopener" data-name="技適マーク JC-STARラベル"><div class="lk-name">技適マーク・JC-STARラベル</div><div class="lk-meta">規格 / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxYmFMwHUpSX5yhErzL789xibecTrg-MLbpwp7y-jh4ZDWQjvuDGzlbkxjIUA_M55Un/exec" target="_blank" rel="noopener" data-name="マイナンバーカード"><div class="lk-name">マイナンバーカード</div><div class="lk-meta">生活 / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzKfN464-P6b5GMb2waSobAaLZscyoVRbh9KElEHcfx7fCJhmJOxjSAC7IvUXu811uazw/exec" target="_blank" rel="noopener" data-name="夏のデジタル活用"><div class="lk-name">夏のデジタル活用</div><div class="lk-meta">季節 / No.10</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwNJPeRBJUbgKbAxoSUtqktVDDUgheRUUp2ro9DLARSsgJY4VFYz4EGHig1zYLRzlLm/exec" target="_blank" rel="noopener" data-name="IT機器活用"><div class="lk-name">IT機器活用</div><div class="lk-meta">ビジネス / No.11</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxlV-sTHJ1_rjd43A2TkNy37d8JJpLHV2-FtKTiczXBn1OcRDD4rvGaZIsPmpgLwW3FGg/exec" target="_blank" rel="noopener" data-name="デジタル技術 防災"><div class="lk-name">デジタル技術（防災）</div><div class="lk-meta">防災 / No.12</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2025年5月 -->
+    <div class="month-content" data-month="2025-05">
+      <div class="month-section">
+        <div class="month-section-hdr"><span class="month-section-label">2025年5月</span><span class="month-section-count">19問</span></div>
+        <div class="links-grid">
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwp4p_Rbgpg24Pu97hW7dk4bZ2UXUatDmsQOuX7pxJ32qvvVteDDYKSLUHoKcaxOEn3uA/exec" target="_blank" rel="noopener" data-name="Windows11の基礎操作"><div class="lk-name">Windows11の基礎操作</div><div class="lk-meta">Windows / No.1</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzUPnfVw0qRvJUaWRPAoblaVSveU76q-BPhs5IA_jJFo8YLRSjlI6Cpn8it9_YmmatFKg/exec" target="_blank" rel="noopener" data-name="Windows11のインストールとアップグレード"><div class="lk-name">Windows11のインストールとアップグレード</div><div class="lk-meta">Windows / No.2</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycby2d5K4GBVeu7jzDIkDiNFsNhu0mkdZ6jDV905Ck0Z-0LQ2VsJ9rZbuYkLkiKDhtMkVhw/exec" target="_blank" rel="noopener" data-name="Windows11の新機能"><div class="lk-name">Windows11の新機能</div><div class="lk-meta">Windows / No.3</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzMFAxfU81pzXm--Yh_FNBNhriB_qGW0wv-cDSI2w27r7hLkFGGikvk-BAnXdXDhdbrsg/exec" target="_blank" rel="noopener" data-name="エクスプローラーの活用"><div class="lk-name">エクスプローラーの活用</div><div class="lk-meta">Windows / No.4</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbw1-lcW1YreXcAStTfgJOpX29OdlV87ukETSuXUasTOpS6XHyekaH36D54yvVO7h2Di/exec" target="_blank" rel="noopener" data-name="デスクトップのカスタマイズ"><div class="lk-name">デスクトップのカスタマイズ</div><div class="lk-meta">Windows / No.5</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzrH0b1YLCrJaEwzBDzQOnF786ewneVJ3DOvVLaFHMusgedjSx582Xash5CzMfNAKvB/exec" target="_blank" rel="noopener" data-name="マルチタスク機能"><div class="lk-name">マルチタスク機能</div><div class="lk-meta">Windows / No.6</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxiuJQDXmfarAAyibwdz_ALK6ht3tdotvy1dJpWdW5Na-vNh81aap8oNTjhm54icEC9/exec" target="_blank" rel="noopener" data-name="セキュリティ機能"><div class="lk-name">セキュリティ機能</div><div class="lk-meta">Windows / No.7</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwRB5i2OilAPLlsTXwSGv6tlvEYwk6ExdocT5nB2v25Hk4CQ5uMd6AAuY54K_a3RIpx/exec" target="_blank" rel="noopener" data-name="ネットワーク設定"><div class="lk-name">ネットワーク設定</div><div class="lk-meta">Windows / No.8</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxhlmv1ecNeACPT8hqAK5vPR0MEQ6mQznMB0DWQIzisEE5Zk7bhtnfugdzT_JIM-9UTnQ/exec" target="_blank" rel="noopener" data-name="周辺機器の接続と管理"><div class="lk-name">周辺機器の接続と管理</div><div class="lk-meta">Windows / No.9</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycby_7vn0FwI9xhJ2fu2ItstWEQHx8rlEIgKzhixb7VGwfcZRr8mU6HP-gWO4RwJpZEBKXA/exec" target="_blank" rel="noopener" data-name="サウンドとオーディオ設定"><div class="lk-name">サウンドとオーディオ設定</div><div class="lk-meta">Windows / No.10</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbyg24fIRzMDEh8hAudz5XbjhpKV_WYQvvHulBESvkfBHQ3OAxiUdQzEcCr_bOX_4NulZA/exec" target="_blank" rel="noopener" data-name="iPhone学び活用"><div class="lk-name">iPhone学び活用</div><div class="lk-meta">Apple / No.11</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzQsu0YQLZKvzcq_rlBzeuFm6o3vI8hGh3FYnyoeyGFktTkDT0ODUeDVn5zGAfobGVRDA/exec" target="_blank" rel="noopener" data-name="iPhone"><div class="lk-name">iPhone</div><div class="lk-meta">Apple / No.12</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbxDNRcq5nhLZ5DPqIC-g6cv7rtJbPWw9ou75p4hDri_puvNvI1XMgM5u39UM26AlFw/exec" target="_blank" rel="noopener" data-name="iPad"><div class="lk-name">iPad</div><div class="lk-meta">Apple / No.13</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzGC5Di-Dz_Usv3NC7lLDMIF6cpclhDvtuKLUycHv_NHywdxscYwg48HJm6SkW3TfFd/exec" target="_blank" rel="noopener" data-name="Apple Watch"><div class="lk-name">Apple Watch</div><div class="lk-meta">Apple / No.14</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwHm4REWnGrmg5gaUV7J8QX-ei3nBrEWzDV4oTZjKoZ235MjUKlD2k14m6Nsv9lGwtr7g/exec" target="_blank" rel="noopener" data-name="Apple製品"><div class="lk-name">Apple製品</div><div class="lk-meta">Apple / No.15</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbz6NVvSYbMzEAHzigfg4qr6o-VZ3n_mdMrYLakG7hbvbz8oCrw66GRdS5WEpOdsbOMJ/exec" target="_blank" rel="noopener" data-name="Apple Intelligence"><div class="lk-name">Apple Intelligence</div><div class="lk-meta">Apple / No.16</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbzIJnFTwpO7_GQ0mh06PLREKi0jFeAtgQUVnkzQbe40ChbcX5YMDVeDzFs0Y3wR1kA/exec" target="_blank" rel="noopener" data-name="Apple Intelligenceの機能と活用シーン"><div class="lk-name">Apple Intelligenceの機能と活用シーン</div><div class="lk-meta">Apple / No.17</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycby8qOcB_SkJ49sMhexn10hs2T_WFX1w7OXWx7iDf56KNZuAm19O3W_cs-dZfcfEkwauqA/exec" target="_blank" rel="noopener" data-name="iPhone Mac iPad iCloud連携"><div class="lk-name">iPhone・Mac・iPad iCloud連携</div><div class="lk-meta">Apple / No.18</div><div class="lk-arr">↗</div></a>
+          <a class="lk" href="https://script.google.com/macros/s/AKfycbwtZ-68iJM7psE3ik_qJLJhwgh8HI6Er-XBeYRgw6pbnQ0XPSfGwx8vQoXBNY8quEfeCw/exec" target="_blank" rel="noopener" data-name="Google TV モニター カメラ機器の基礎知識"><div class="lk-name">Google TV・モニター・カメラ機器の基礎知識</div><div class="lk-meta">その他 / No.19</div><div class="lk-arr">↗</div></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     大カテゴリ2：プロダクトテスト
+══════════════════════════════ -->
+<div class="bigcat" id="cat-test">
+  <div class="bigcat-hdr" id="hdr-test" onclick="toggleCat('test')">
+    <div class="bigcat-left">
+      <div class="bigcat-icon">🧪</div>
+      <div class="bigcat-info">
+        <div class="bigcat-name">プロダクトテスト</div>
+        <div class="bigcat-sub">月別テスト — 2025年5月〜</div>
+      </div>
+    </div>
+    <div class="bigcat-arrow">▶</div>
+  </div>
+  <div class="bigcat-body" id="body-test">
+    <div class="test-links">
+      <a class="test-lk" href="https://forms.gle/NUyMErQN37GMcGV16" target="_blank" rel="noopener" data-name="2026年6月 プロダクトテスト"><div><div class="test-lk-name">2026年6月 プロダクトテスト</div><div class="test-lk-meta">202606</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://docs.google.com/forms/d/e/1FAIpQLSdWZT-pm447yZio3zB-n9hFMidjVoSZc0bof73ur75vQI-8jA/viewform" target="_blank" rel="noopener" data-name="2026年5月 プロダクトテスト"><div><div class="test-lk-name">2026年5月 プロダクトテスト</div><div class="test-lk-meta">202605</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://docs.google.com/forms/d/e/1FAIpQLSf6Xx7sKyYyioDUypfd-j4Dv65eAPDcAi_YfqEb8n5sC3Jfgw/viewform" target="_blank" rel="noopener" data-name="2026年4月 プロダクトテスト"><div><div class="test-lk-name">2026年4月 プロダクトテスト</div><div class="test-lk-meta">202604</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://docs.google.com/forms/d/e/1FAIpQLSfkwcB0Dj2BvgIRbxQnaXa2FIJq01n-iWONnglRHAFBavw4FQ/viewform" target="_blank" rel="noopener" data-name="2026年3月 プロダクトテスト"><div><div class="test-lk-name">2026年3月 プロダクトテスト</div><div class="test-lk-meta">202603</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://docs.google.com/forms/d/e/1FAIpQLSeiIwqbMBafKvZY-Zbo-oxzxAjmAoh_O_wQtGgQSbrJs9L6RQ/viewform" target="_blank" rel="noopener" data-name="2026年2月 プロダクトテスト"><div><div class="test-lk-name">2026年2月 プロダクトテスト</div><div class="test-lk-meta">202602</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://forms.gle/zMs3XRVQKxuTBudZ9" target="_blank" rel="noopener" data-name="2026年1月 プロダクトテスト"><div><div class="test-lk-name">2026年1月 プロダクトテスト</div><div class="test-lk-meta">202601</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://forms.gle/Yvmbbo1Bhd46y1Z27" target="_blank" rel="noopener" data-name="2025年12月 プロダクトテスト"><div><div class="test-lk-name">2025年12月 プロダクトテスト</div><div class="test-lk-meta">202512</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://forms.gle/69XnpyfsCsFARGKi6" target="_blank" rel="noopener" data-name="2025年11月 プロダクトテスト"><div><div class="test-lk-name">2025年11月 プロダクトテスト</div><div class="test-lk-meta">202511</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://docs.google.com/forms/d/e/1FAIpQLSey4plX1CbqWe9f4Z1aUKMyCb6A6qnMgtNQz9shykNfpI-ipw/viewform" target="_blank" rel="noopener" data-name="2025年10月 プロダクトテスト"><div><div class="test-lk-name">2025年10月 プロダクトテスト</div><div class="test-lk-meta">202510</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://forms.gle/2qfE6sie529SnAQE8" target="_blank" rel="noopener" data-name="2025年9月 プロダクトテスト"><div><div class="test-lk-name">2025年9月 プロダクトテスト</div><div class="test-lk-meta">202509</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://forms.gle/hsUSZB78FU4nukmC6" target="_blank" rel="noopener" data-name="2025年8月 プロダクトテスト"><div><div class="test-lk-name">2025年8月 プロダクトテスト</div><div class="test-lk-meta">202508</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://forms.gle/9vwpZSnS31uj9yc39" target="_blank" rel="noopener" data-name="2025年7月 プロダクトテスト"><div><div class="test-lk-name">2025年7月 プロダクトテスト</div><div class="test-lk-meta">202507</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://forms.gle/KraW9bRQ8fs9RrAP8" target="_blank" rel="noopener" data-name="2025年6月 プロダクトテスト"><div><div class="test-lk-name">2025年6月 プロダクトテスト</div><div class="test-lk-meta">202506</div></div><div class="test-arr">↗</div></a>
+      <a class="test-lk" href="https://docs.google.com/forms/d/e/1FAIpQLSdgHM8Nytu1GjK_MGqKNFPm5gZ2ptYuz7-en52W8-Oo5oNhjw/viewform" target="_blank" rel="noopener" data-name="2025年5月 プロダクトテスト"><div><div class="test-lk-name">2025年5月 プロダクトテスト</div><div class="test-lk-meta">202505</div></div><div class="test-arr">↗</div></a>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="ft-brand">MISHIMA ACADEMY.</div>
+    <div class="ft-copy">Study Board — Mishima, JP</div>
+  </div>
+  <div class="ft-meta">VOL.I — 2026<br><span style="color:var(--yellow)">// Learn every day.</span></div>
+</footer>
+
+<script>
+'use strict';
+/* ── ハンバーガーメニュー ── */
+const burger=document.getElementById('burger');
+const sidemenu=document.getElementById('sidemenu');
+const overlay=document.getElementById('overlay');
+const smClose=document.getElementById('sm-close');
+function openMenu(){sidemenu.classList.add('open');overlay.classList.add('open')}
+function closeMenu(){sidemenu.classList.remove('open');overlay.classList.remove('open')}
+burger.addEventListener('click',openMenu);
+smClose.addEventListener('click',closeMenu);
+overlay.addEventListener('click',closeMenu);
+
+/* ── 時計 ── */
+const WEEK=['日','月','火','水','木','金','土'];
+function tick(){
+  const n=new Date();
+  const p=v=>String(v).padStart(2,'0');
+  document.getElementById('hd-time').textContent=`${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+  document.getElementById('hd-date').textContent=`${n.getFullYear()}.${p(n.getMonth()+1)}.${p(n.getDate())} (${WEEK[n.getDay()]})`;
+}
+tick();setInterval(tick,1000);
+
+/* ── 大カテゴリ開閉 ── */
+function toggleCat(id){
+  const hdr=document.getElementById('hdr-'+id);
+  const body=document.getElementById('body-'+id);
+  hdr.classList.toggle('open');
+  body.classList.toggle('open');
+}
+function openCat(id){
+  const hdr=document.getElementById('hdr-'+id);
+  const body=document.getElementById('body-'+id);
+  if(!hdr.classList.contains('open')){
+    hdr.classList.add('open');
+    body.classList.add('open');
+  }
+  setTimeout(()=>document.getElementById('cat-'+id).scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+/* ── 月タブ切り替え ── */
+function switchMonth(catId, month){
+  const body=document.getElementById('body-'+catId);
+  body.querySelectorAll('.mtab').forEach(t=>{
+    t.classList.toggle('active', t.dataset.month===month);
+  });
+  body.querySelectorAll('.month-content').forEach(c=>{
+    c.classList.toggle('active', c.dataset.month===month);
+  });
+}
+
+/* ── 検索 ── */
+document.getElementById('search').addEventListener('input',function(){
+  const q=this.value.trim().toLowerCase();
+  if(!q){
+    document.querySelectorAll('.lk,.test-lk').forEach(l=>l.classList.remove('hidden'));
+    document.querySelectorAll('.bigcat-hdr').forEach(h=>h.classList.remove('open'));
+    document.querySelectorAll('.bigcat-body').forEach(b=>b.classList.remove('open'));
+    document.getElementById('no-match').style.display='none';
+    return;
+  }
+  let vis=0;
+  document.querySelectorAll('.lk').forEach(lk=>{
+    const name=(lk.dataset.name||'').toLowerCase();
+    const meta=lk.querySelector('.lk-meta')?.textContent.toLowerCase()||'';
+    const show=name.includes(q)||meta.includes(q);
+    lk.classList.toggle('hidden',!show);
+    if(show)vis++;
+  });
+  document.querySelectorAll('.test-lk').forEach(lk=>{
+    const name=(lk.dataset.name||'').toLowerCase();
+    const show=name.includes(q);
+    lk.classList.toggle('hidden',!show);
+    if(show)vis++;
+  });
+  // 検索時は全大カテゴリを開いて全月を表示
+  document.querySelectorAll('.bigcat-hdr').forEach(h=>h.classList.add('open'));
+  document.querySelectorAll('.bigcat-body').forEach(b=>b.classList.add('open'));
+  document.querySelectorAll('.month-content').forEach(c=>c.classList.add('active'));
+  document.getElementById('no-match').style.display=vis===0?'block':'none';
+});
+/* ── Service Worker 登録 ── */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
